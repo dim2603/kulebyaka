@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кулебяка Тестер</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.4s ease;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"] {
+            width: 300px;
+            height: 15px;
+            margin: 20px 0;
+            cursor: pointer;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .text {
+            font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+            font-size: 28px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .emojis {
+            font-size: 24px;
+            line-height: 1.5;
+            max-width: 90vw;
+            word-wrap: break-word;
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <input type="range" min="0" max="100" value="50" id="slider">
+        <div class="text" id="counter">50 кулебяк из 100</div>
+        <div class="emojis" id="emojisContainer"></div>
+    </div>
+
+    <script>
+        const slider = document.getElementById('slider');
+        const counter = document.getElementById('counter');
+        const emojisContainer = document.getElementById('emojisContainer');
+
+        function hexToRgb(hex) {
+            const bigint = parseInt(hex.slice(1), 16);
+            return {
+                r: (bigint >> 16) & 255,
+                g: (bigint >> 8) & 255,
+                b: bigint & 255
+            };
+        }
+
+        function interpolateColor(color1, color2, progress) {
+            return {
+                r: Math.round(color1.r + (color2.r - color1.r) * progress),
+                g: Math.round(color1.g + (color2.g - color1.g) * progress),
+                b: Math.round(color1.b + (color2.b - color1.b) * progress)
+            };
+        }
+
+        function updateBackground() {
+            const value = slider.value;
+            let colorStart, colorEnd;
+            
+            if (value <= 50) {
+                const progress = value / 50;
+                colorStart = interpolateColor(
+                    hexToRgb('#FF3B30'), 
+                    hexToRgb('#FF9500'), 
+                    progress
+                );
+                colorEnd = interpolateColor(
+                    hexToRgb('#DC143C'), 
+                    hexToRgb('#FF5E3A'), 
+                    progress
+                );
+            } else {
+                const progress = (value - 50) / 50;
+                colorStart = interpolateColor(
+                    hexToRgb('#FF9500'), 
+                    hexToRgb('#4CAF50'), 
+                    progress
+                );
+                colorEnd = interpolateColor(
+                    hexToRgb('#FF5E3A'), 
+                    hexToRgb('#388E3C'), 
+                    progress
+                );
+            }
+
+            document.body.style.background = 
+                `linear-gradient(141deg, 
+                rgb(${colorStart.r}, ${colorStart.g}, ${colorStart.b}), 
+                rgb(${colorEnd.r}, ${colorEnd.g}, ${colorEnd.b}))`;
+        }
+
+        function updateEmojis() {
+            const count = parseInt(slider.value);
+            emojisContainer.textContent = '🥖'.repeat(count);
+        }
+
+        slider.addEventListener('input', () => {
+            counter.textContent = `${slider.value} кулебяк из 100`;
+            updateBackground();
+            updateEmojis();
+        });
+
+        updateBackground();
+        updateEmojis();
+    </script>
+</body>
+</html>
