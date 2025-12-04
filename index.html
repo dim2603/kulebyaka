@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Кулебяка Тестер</title>
+    <title>До корпоратива!</title>
     <style>
         body {
             margin: 0;
@@ -11,121 +11,261 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: background 0.4s ease;
+            font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+            overflow: hidden;
         }
 
         .container {
             text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
-        input[type="range"] {
-            width: 300px;
-            height: 15px;
-            margin: 20px 0;
-            cursor: pointer;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .text {
-            font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-            font-size: 28px;
+        h1 {
             color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            font-size: 36px;
+        }
+
+        .counter {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
             margin-bottom: 20px;
         }
 
-        .emojis {
-            font-size: 24px;
-            line-height: 1.5;
-            max-width: 90vw;
-            word-wrap: break-word;
-            min-height: 60px;
+        .time-unit {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            min-width: 100px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .number {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+            margin-bottom: 5px;
+        }
+
+        .label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.95);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .date-info {
+            color: white;
+            font-size: 20px;
+            margin-top: 20px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        
+        .emoji {
+            font-size: 40px;
+            margin-top: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <input type="range" min="0" max="100" value="50" id="slider">
-        <div class="text" id="counter">50 кулебяк из 100</div>
-        <div class="emojis" id="emojisContainer"></div>
+        <h1>До корпоратива осталось:</h1>
+        
+        <div class="counter">
+            <div class="time-unit">
+                <div class="number" id="days">00</div>
+                <div class="label">дней</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="hours">00</div>
+                <div class="label">часов</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="minutes">00</div>
+                <div class="label">минут</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="seconds">00</div>
+                <div class="label">секунд</div>
+            </div>
+        </div>
+        
+        <div class="date-info">21 декабря 2025 • 18:00</div>
+        <div class="emoji" id="emoji">🥳</div>
     </div>
 
     <script>
-        const slider = document.getElementById('slider');
-        const counter = document.getElementById('counter');
-        const emojisContainer = document.getElementById('emojisContainer');
-
-        function hexToRgb(hex) {
-            const bigint = parseInt(hex.slice(1), 16);
-            return {
-                r: (bigint >> 16) & 255,
-                g: (bigint >> 8) & 255,
-                b: bigint & 255
-            };
-        }
-
-        function interpolateColor(color1, color2, progress) {
-            return {
-                r: Math.round(color1.r + (color2.r - color1.r) * progress),
-                g: Math.round(color1.g + (color2.g - color1.g) * progress),
-                b: Math.round(color1.b + (color2.b - color1.b) * progress)
-            };
-        }
-
-        function updateBackground() {
-            const value = slider.value;
-            let colorStart, colorEnd;
+        // Целевая дата: 21 декабря 2025 года, 18:00
+        const targetDate = new Date('2025-12-21T18:00:00');
+        
+        // Элементы счетчика
+        const daysElement = document.getElementById('days');
+        const hoursElement = document.getElementById('hours');
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const emojiElement = document.getElementById('emoji');
+        
+        // Параметры для динамического градиента
+        let time = 0;
+        const colors = [
+            [255, 59, 48],    // Красный
+            [255, 149, 0],    // Оранжевый  
+            [255, 204, 0],    // Желтый
+            [52, 199, 89],    // Зеленый
+            [0, 122, 255],    // Синий
+            [88, 86, 214],    // Фиолетовый
+            [255, 45, 85]     // Розовый
+        ];
+        
+        // Создание динамического градиента
+        function createDynamicGradient() {
+            time += 0.003;
             
-            if (value <= 50) {
-                const progress = value / 50;
-                colorStart = interpolateColor(
-                    hexToRgb('#FF3B30'), 
-                    hexToRgb('#FF9500'), 
-                    progress
-                );
-                colorEnd = interpolateColor(
-                    hexToRgb('#DC143C'), 
-                    hexToRgb('#FF5E3A'), 
-                    progress
-                );
-            } else {
-                const progress = (value - 50) / 50;
-                colorStart = interpolateColor(
-                    hexToRgb('#FF9500'), 
-                    hexToRgb('#4CAF50'), 
-                    progress
-                );
-                colorEnd = interpolateColor(
-                    hexToRgb('#FF5E3A'), 
-                    hexToRgb('#388E3C'), 
-                    progress
-                );
-            }
-
+            // Вычисляем текущие цвета на основе времени
+            const t1 = (Math.sin(time) + 1) / 2;
+            const t2 = (Math.sin(time * 0.8 + 2) + 1) / 2;
+            
+            const colorIndex1 = Math.floor(t1 * (colors.length - 1));
+            const colorIndex2 = Math.floor(t2 * (colors.length - 1));
+            
+            const color1 = colors[colorIndex1];
+            const color2 = colors[colorIndex2];
+            const nextColor1 = colors[colorIndex1 + 1] || colors[0];
+            const nextColor2 = colors[colorIndex2 + 1] || colors[0];
+            
+            // Интерполяция цветов
+            const progress1 = (t1 * (colors.length - 1)) % 1;
+            const progress2 = (t2 * (colors.length - 1)) % 1;
+            
+            const startColor = [
+                Math.round(color1[0] + (nextColor1[0] - color1[0]) * progress1),
+                Math.round(color1[1] + (nextColor1[1] - color1[1]) * progress1),
+                Math.round(color1[2] + (nextColor1[2] - color1[2]) * progress1)
+            ];
+            
+            const endColor = [
+                Math.round(color2[0] + (nextColor2[0] - color2[0]) * progress2),
+                Math.round(color2[1] + (nextColor2[1] - color2[1]) * progress2),
+                Math.round(color2[2] + (nextColor2[2] - color2[2]) * progress2)
+            ];
+            
+            // Создание градиента под углом 141 градус
+            const angle = 141;
             document.body.style.background = 
-                `linear-gradient(141deg, 
-                rgb(${colorStart.r}, ${colorStart.g}, ${colorStart.b}), 
-                rgb(${colorEnd.r}, ${colorEnd.g}, ${colorEnd.b}))`;
+                `linear-gradient(${angle}deg, 
+                rgb(${startColor.join(',')}), 
+                rgb(${endColor.join(',')}))`;
+            
+            // Меняем эмодзи в зависимости от оставшегося времени
+            updateEmoji();
+            
+            requestAnimationFrame(createDynamicGradient);
         }
-
-        function updateEmojis() {
-            const count = parseInt(slider.value);
-            emojisContainer.textContent = '🥖'.repeat(count);
+        
+        // Обновление счетчика
+        function updateCountdown() {
+            const now = new Date();
+            const timeLeft = targetDate - now;
+            
+            if (timeLeft <= 0) {
+                daysElement.textContent = '00';
+                hoursElement.textContent = '00';
+                minutesElement.textContent = '00';
+                secondsElement.textContent = '00';
+                
+                if (timeLeft < -86400000) {
+                    document.querySelector('h1').textContent = 'Корпоратив уже прошел!';
+                    emojiElement.textContent = '😢';
+                } else {
+                    document.querySelector('h1').textContent = 'Корпоратив сегодня! 🎉';
+                    emojiElement.textContent = '🎊🥳🎈';
+                }
+                return;
+            }
+            
+            const totalSeconds = Math.floor(timeLeft / 1000);
+            const days = Math.floor(totalSeconds / (3600 * 24));
+            const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            daysElement.textContent = days.toString().padStart(2, '0');
+            hoursElement.textContent = hours.toString().padStart(2, '0');
+            minutesElement.textContent = minutes.toString().padStart(2, '0');
+            secondsElement.textContent = seconds.toString().padStart(2, '0');
         }
-
-        slider.addEventListener('input', () => {
-            counter.textContent = `${slider.value} кулебяк из 100`;
-            updateBackground();
-            updateEmojis();
-        });
-
-        updateBackground();
-        updateEmojis();
+        
+        // Обновление эмодзи в зависимости от времени
+        function updateEmoji() {
+            const now = new Date();
+            const timeLeft = targetDate - now;
+            const daysLeft = Math.floor(timeLeft / (1000 * 3600 * 24));
+            
+            if (timeLeft <= 0) return;
+            
+            if (daysLeft > 30) {
+                emojiElement.textContent = '📅';
+            } else if (daysLeft > 7) {
+                emojiElement.textContent = '⏳';
+            } else if (daysLeft > 3) {
+                emojiElement.textContent = '🎯';
+            } else if (daysLeft > 1) {
+                emojiElement.textContent = '🔥';
+            } else if (daysLeft === 1) {
+                emojiElement.textContent = '🚀';
+            } else if (daysLeft === 0) {
+                const hoursLeft = Math.floor(timeLeft / (1000 * 3600));
+                if (hoursLeft > 5) emojiElement.textContent = '👀';
+                else if (hoursLeft > 1) emojiElement.textContent = '⚡';
+                else emojiElement.textContent = '🎉';
+            }
+        }
+        
+        // Инициализация
+        function init() {
+            // Проверка даты
+            const now = new Date();
+            if (now > targetDate) {
+                document.querySelector('h1').textContent = 'Корпоратив уже прошел!';
+                emojiElement.textContent = '😢';
+            }
+            
+            // Запуск анимации градиента
+            createDynamicGradient();
+            
+            // Запуск таймера
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+            
+            // Плавная анимация контейнера
+            let scale = 1;
+            setInterval(() => {
+                const container = document.querySelector('.container');
+                scale = 1 + Math.sin(Date.now() / 2500) * 0.015;
+                container.style.transform = `scale(${scale})`;
+                container.style.transition = 'transform 0.3s ease';
+            }, 16);
+        }
+        
+        // Запуск при загрузке
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
